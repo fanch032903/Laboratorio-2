@@ -1,0 +1,391 @@
+//********************************************/
+//Universidad del Valle de Guatemala
+//BE3029 - Electrónica Digital 2
+// Fátima Camposeco
+//01/08/2025
+// Laboratorio 2
+//MCU: ESP32 dev kit 1.0
+//********************************************/
+
+//********************************************/
+//Librerias
+//********************************************/
+
+#include <Arduino.h>
+#include <stdint.h>
+
+//definir estados 
+typedef enum estados {s0, s1, s2, s3,s4, sb, sb1, sb2, sb3,sb4,
+sb5, sb6, sb7, sb8, sb9, sb10, sb11, sb12, sb13,
+sb14,sb15} estados;
+
+//Estado actual y futuro 
+estados estadoActual = s0;
+estados estadoFuturo = s0;
+
+//Pines de botones 
+const uint8_t botonModo = 19;
+const uint8_t botonSuma = 21;
+const uint8_t botonResta = 22;
+
+//Pines Leds
+const uint8_t  Led1 = 2;
+const uint8_t  Led2 = 4;
+const uint8_t  Led3 = 5;
+const uint8_t  Led4 = 18;
+
+//Antirrebote en boleanos 
+unsigned long lastDebounce = 0;
+const long tiempo = 100;
+bool estadobotonsuma = HIGH;
+bool estadobotonresta = LOW;
+bool estadomodo = LOW;
+bool lecturabotonsuma;
+bool lecturabotonresta;
+bool lecturamodo;
+
+void setup() {
+//Entrdas 
+pinMode(botonModo, INPUT_PULLDOWN);
+pinMode(botonSuma, INPUT_PULLUP);
+pinMode(botonResta, INPUT);
+
+//LEDS 
+pinMode(Led1, OUTPUT);
+pinMode(Led2, OUTPUT);
+pinMode(Led3, OUTPUT);
+pinMode(Led4, OUTPUT);
+
+}
+
+void loop(){
+
+  unsigned long currentMillis = millis();
+
+  // Lectura de botones
+  lecturabotonsuma = digitalRead(botonSuma);
+  lecturabotonresta = digitalRead(botonResta);
+  lecturamodo = digitalRead(botonModo);
+
+  // Antirrebote
+  if (currentMillis - lastDebounce >= tiempo) {
+    bool flancomas = (lecturabotonsuma == LOW && estadobotonsuma == HIGH);
+    bool flancomenos = (lecturabotonresta == HIGH && estadobotonresta == LOW);
+    bool flancomodo = (lecturamodo == HIGH && estadomodo == LOW);
+
+    estadobotonsuma = lecturabotonsuma;
+    estadobotonresta = lecturabotonresta;
+    estadomodo = lecturamodo;
+
+    lastDebounce = currentMillis;
+
+  bool estadoModo = digitalRead(botonModo);
+  bool estadoSuma = digitalRead(botonSuma);
+  bool estadoResta = digitalRead(botonResta);
+  
+// transiciones de estados
+  switch (estadoActual){
+    case s0:
+      if(estadoSuma == HIGH)
+        estadoFuturo = s1;
+      if(estadoResta == LOW)
+        estadoFuturo = s4;
+      if(estadoModo == LOW)
+        estadoFuturo = sb;
+      break;
+    case s1: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = s2; 
+      if(estadoResta == LOW)
+        estadoFuturo = s0;
+      if(estadoModo == LOW)
+        estadoFuturo = sb;
+      break; 
+    case s2: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = s3; 
+      if(estadoResta == LOW)
+        estadoFuturo = s1;
+      if(estadoModo == LOW)
+        estadoFuturo = sb;
+      break;
+    case s3: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = s4; 
+      if(estadoResta == LOW)
+        estadoFuturo = s2;
+      if(estadoModo == LOW)
+        estadoFuturo = sb;
+      break;     
+    case s4: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = s0; 
+      if(estadoResta == LOW)
+        estadoFuturo = s3;
+      if(estadoModo == LOW)
+        estadoFuturo = sb;
+      break;    
+//binario        
+    case sb: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb1; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb15;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;   
+    case sb1: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb2; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;   
+    case sb2: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb3; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb1;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;
+    case sb3: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb4; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb2;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break; 
+    case sb4: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb5; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb3;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;          
+    case sb5: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb6; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb4;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+    case sb6: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb7; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb5;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+    case sb7: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb8; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb6;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+      case sb8: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb9; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb7;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+      case sb9: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb10; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb8;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+      case sb10: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb11; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb9;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+      case sb11: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb12; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb10;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+      case sb12: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb13; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb11;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+      case sb13: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb14; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb12;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+      case sb14: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb15; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb13;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+      case sb15: 
+      if(estadoSuma == HIGH)
+        estadoFuturo = sb; 
+      if(estadoResta == LOW)
+        estadoFuturo = sb14;
+      if(estadoModo == LOW)
+        estadoFuturo = s0;
+      break;  
+  }
+
+//Configuración de las salidas
+switch (estadoActual)
+{
+case s0: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, LOW);
+break;
+case s1: 
+digitalWrite(Led1, HIGH);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, LOW);
+break;
+case s2: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, HIGH);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, LOW);
+break;
+case s3: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, HIGH);
+digitalWrite(Led4, LOW);
+break;
+case s4: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, HIGH);
+break;
+case sb: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, LOW);
+break;
+case sb1: 
+digitalWrite(Led1, HIGH);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, LOW);
+break;
+case sb2: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, HIGH);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, LOW);
+break;
+case sb3: 
+digitalWrite(Led1, HIGH);
+digitalWrite(Led2, HIGH);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, LOW);
+break;
+case sb4: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, HIGH);
+digitalWrite(Led4, LOW);
+break;
+case sb5: 
+digitalWrite(Led1, HIGH);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, HIGH);
+digitalWrite(Led4, LOW);
+break;
+case sb6: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, HIGH);
+digitalWrite(Led3, HIGH);
+digitalWrite(Led4, LOW);
+break;
+case sb7: 
+digitalWrite(Led1, HIGH);
+digitalWrite(Led2, HIGH);
+digitalWrite(Led3, HIGH);
+digitalWrite(Led4, LOW);
+break;
+case sb8: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, HIGH);
+break;
+case sb9: 
+digitalWrite(Led1, HIGH);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, HIGH);
+break;
+case sb10: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, HIGH);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, HIGH);
+break;
+case sb11: 
+digitalWrite(Led1, HIGH);
+digitalWrite(Led2, HIGH);
+digitalWrite(Led3, LOW);
+digitalWrite(Led4, HIGH);
+break;
+case sb12: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, HIGH);
+digitalWrite(Led4, HIGH);
+break;
+case sb13: 
+digitalWrite(Led1, HIGH);
+digitalWrite(Led2, LOW);
+digitalWrite(Led3, HIGH);
+digitalWrite(Led4, HIGH);
+break;
+case sb14: 
+digitalWrite(Led1, LOW);
+digitalWrite(Led2, HIGH);
+digitalWrite(Led3, HIGH);
+digitalWrite(Led4, HIGH);
+break;
+case sb15: 
+digitalWrite(Led1, HIGH);
+digitalWrite(Led2, HIGH);
+digitalWrite(Led3, HIGH);
+digitalWrite(Led4, HIGH);
+break;
+}
+    estadoActual = estadoFuturo;
+}
+ }
